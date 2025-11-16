@@ -1,0 +1,47 @@
+#!/bin/bash
+# -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
+
+MYDIR="$(cd "$(dirname -- "$0")"; pwd)"
+MYNAME="$(basename -- "$0")"
+
+SOPTS=bkDj
+LOPTS=help,build,remove,debug,no-cache
+args="$(getopt -n "$MYNAME" -o "$SOPTS" -l "$LOPTS" -- "$@")" || exit 1; eval "set -- $args"
+
+build=
+build_args=()
+remove=
+while [ $# -gt 0 ]; do
+    case "$1" in
+    --) shift; break;;
+    --help)
+        eecho "\
+$MYNAME: lancer moodle-dev
+
+USAGE
+    $MYNAME [options...]
+
+OPTIONS
+    -b, --build
+        (re)construire l'image avant de lancer les containers
+    -k, --remove
+        supprimer les volumes pour redémarrer à zéro"
+        exit 0
+        ;;
+    -b|--build) build=1;;
+    -D|--debug) build_args+=(--progress plain);;
+    -j|--no-cache) build_args+=(--no-cache);;
+    -k|--remove) remove=1;;
+    *) die "$1: option non configurée";;
+    esac
+    shift
+done
+
+if [ -n "$remove" ]; then
+    docker compose down -v
+fi
+if [ -n "$build" ]; then
+    docker compose build "${build_args[@]}" || exit 1
+fi
+
+docker compose up

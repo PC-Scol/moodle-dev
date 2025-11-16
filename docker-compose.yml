@@ -1,0 +1,32 @@
+# -*- coding: utf-8 mode: yaml -*- vim:sw=2:sts=2:et:ai:si:sta:fenc=utf-8
+
+services:
+  web:
+    build: src
+    image: moodle-dev
+    environment: {}
+    volumes:
+      - ./src:/src
+      - ./plugins:/src/plugins
+      - app:/var/www/moodle
+      - data:/var/www/moodledata
+    ports:
+      - 7081:8080
+    depends_on:
+      - db
+
+  db:
+    image: mariadb:lts
+    environment:
+      MARIADB_ROOT_PASSWORD: admin
+      MARIADB_USER: moodle
+      MARIADB_PASSWORD: moodle
+      MARIADB_DATABASE: moodle
+    volumes:
+      - ./src/mariadb:/etc/mysql/conf.d
+      - db:/var/lib/mysql
+
+volumes:
+  db:
+  app:
+  data:
