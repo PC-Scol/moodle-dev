@@ -2,10 +2,11 @@
 FROM php:8.2-apache
 
 USER root
-COPY ./ /src/
+COPY src/ /src/
+COPY install/ /src/install/
 RUN /src/build.sh
 
 EXPOSE 8080
 USER moodle
-WORKDIR /var/www/moodle
+WORKDIR /var/www/moodle/public
 ENTRYPOINT ["/src/entrypoint.sh"]

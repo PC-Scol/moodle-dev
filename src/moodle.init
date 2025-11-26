@@ -2,3 +2,13 @@
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
 # Ces commandes ne sont lancées QUE lors de l'installation initiale
 
+moosh language-install fr
+
+moosh config-set cronclionly 0
+moosh config-set cronremotepassword cron
+
+moosh config-set smtphosts smtp.domain.tld
+moosh config-set noreplyaddress no-reply@univ-domain.tld
+
+moosh plugin-list
+moosh plugin-install local_adminer

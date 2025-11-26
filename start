@@ -4,18 +4,20 @@
 MYDIR="$(cd "$(dirname -- "$0")"; pwd)"
 MYNAME="$(basename -- "$0")"
 
-SOPTS=bkDj
-LOPTS=help,build,remove,debug,no-cache
+SOPTS=bDjKdkn
+LOPTS=help,build,remove,debug,no-cache,detach,stop,none
 args="$(getopt -n "$MYNAME" -o "$SOPTS" -l "$LOPTS" -- "$@")" || exit 1; eval "set -- $args"
 
 build=
 build_args=()
 remove=
+action=up
+action_options=()
 while [ $# -gt 0 ]; do
     case "$1" in
     --) shift; break;;
     --help)
-        eecho "\
+        echo "\
 $MYNAME: lancer moodle-dev
 
 USAGE
@@ -23,15 +25,24 @@ USAGE
 
 OPTIONS
     -b, --build
+    -D, --debug
+    -j, --no-cache
         (re)construire l'image avant de lancer les containers
-    -k, --remove
-        supprimer les volumes pour redémarrer à zéro"
+    -K, --remove
+        supprimer les volumes pour redémarrer à zéro
+    -d, --detach
+        lancer les containers en tâche de fond
+    -k, --stop
+        arrêter les containers qui tournent en tâche de fond"
         exit 0
         ;;
     -b|--build) build=1;;
     -D|--debug) build_args+=(--progress plain);;
     -j|--no-cache) build_args+=(--no-cache);;
-    -k|--remove) remove=1;;
+    -K|--remove) remove=1;;
+    -d|--detach) action=up; action_options+=(--detach);;
+    -k|--stop) action=down;;
+    -n|--none) action=none;;
     *) die "$1: option non configurée";;
     esac
     shift
@@ -44,4 +55,6 @@ if [ -n "$build" ]; then
     docker compose build "${build_args[@]}" || exit 1
 fi
 
-docker compose up
+if [ "$action" != none ]; then
+    exec docker compose "$action" "${action_options[@]}"
+fi

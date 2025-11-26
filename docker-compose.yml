@@ -2,18 +2,26 @@
 
 services:
   web:
-    build: src
+    build:
+      context: .
+      dockerfile: src/Dockerfile
     image: moodle-dev
-    environment: {}
+    environment:
+      MOODLE_ROOT: /var/www/moodle
     volumes:
       - ./src:/src
-      - ./plugins:/src/plugins
       - app:/var/www/moodle
       - data:/var/www/moodledata
     ports:
-      - 7081:8080
+      - $LISTEN:8080
     depends_on:
       - db
+
+  cron:
+    image: busybox:stable
+    volumes:
+      - ./src:/src
+    command: ["/src/cron/cron.sh"]
 
   db:
     image: mariadb:lts
