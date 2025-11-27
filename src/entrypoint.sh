@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
-source /src/shared_env || exit 1
-source /src/moodle.conf || exit 1
+source /config/shared_env || exit 1
+source /config/moodle.conf || exit 1
 
 MYDIR="$(cd "$(dirname "$0")"; pwd)"
 MYNAME="$(basename "$0")"
@@ -22,8 +22,8 @@ while true; do
 done
 
 # configurer moodle
+cd /var/www/moodle
 if [ ! -d vendor ]; then
-    cd /var/www/moodle
     composer i
 fi
 if [ ! -f config.php ]; then
@@ -33,7 +33,7 @@ if [ ! -f config.php ]; then
 
     echo "# configuration initiale de moodle"
     cd /var/www/moodle/public
-    /src/moodle.init
+    /config/moodle.init
 fi
 
 # démarrer apache

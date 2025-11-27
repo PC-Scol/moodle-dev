@@ -9,8 +9,10 @@ services:
     environment:
       MOODLE_ROOT: /var/www/moodle
     volumes:
+      - ./install/moosh:/opt/moosh
+      - ./install/moodle:/var/www/moodle
       - ./src:/src
-      - app:/var/www/moodle
+      - ./config:/config
       - data:/var/www/moodledata
     ports:
       - $LISTEN:8080
@@ -35,6 +37,5 @@ services:
       - db:/var/lib/mysql
 
 volumes:
-  db:
-  app:
   data:
+  db:

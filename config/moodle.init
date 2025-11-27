@@ -2,13 +2,19 @@
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
 # Ces commandes ne sont lancées QUE lors de l'installation initiale
 
+# installer la langue française
 moosh language-install fr
 
+# configurer le lancement de cron via le web (ne pas modifier)
 moosh config-set cronclionly 0
 moosh config-set cronremotepassword cron
 
+# configurer le serveur mail
 moosh config-set smtphosts smtp.domain.tld
 moosh config-set noreplyaddress no-reply@univ-domain.tld
 
+# télécharger la liste des plugins disponibles
 moosh plugin-list
+
+# puis installer les plugins
 moosh plugin-install local_adminer

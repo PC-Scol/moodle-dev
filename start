@@ -4,13 +4,19 @@
 MYDIR="$(cd "$(dirname -- "$0")"; pwd)"
 MYNAME="$(basename -- "$0")"
 
-SOPTS=bDjKdkn
-LOPTS=help,build,remove,debug,no-cache,detach,stop,none
+function die() {
+    echo "ERREUR FATALE: $*" 1>&2
+    exit 1
+}
+
+SOPTS=bDjK0dkn
+LOPTS=help,build,remove,nuke,debug,no-cache,detach,stop,none
 args="$(getopt -n "$MYNAME" -o "$SOPTS" -l "$LOPTS" -- "$@")" || exit 1; eval "set -- $args"
 
 build=
 build_args=()
 remove=
+nuke=
 action=up
 action_options=()
 while [ $# -gt 0 ]; do
@@ -29,7 +35,9 @@ OPTIONS
     -j, --no-cache
         (re)construire l'image avant de lancer les containers
     -K, --remove
-        supprimer les volumes pour redémarrer à zéro
+        supprimer les volumes et la configuration pour redémarrer à zéro
+    -0, --nuke
+        supprimer aussi le répertoire install/moodle
     -d, --detach
         lancer les containers en tâche de fond
     -k, --stop
@@ -40,6 +48,7 @@ OPTIONS
     -D|--debug) build_args+=(--progress plain);;
     -j|--no-cache) build_args+=(--no-cache);;
     -K|--remove) remove=1;;
+    -0|--nuke) nuke=1;;
     -d|--detach) action=up; action_options+=(--detach);;
     -k|--stop) action=down;;
     -n|--none) action=none;;
@@ -48,13 +57,41 @@ OPTIONS
     shift
 done
 
+cd "$MYDIR"
 if [ -n "$remove" ]; then
     docker compose down -v
+    if [ -n "$nuke" ]; then
+        rm -rf install/moodle
+    else
+        rm -f install/moodle/config.php
+    fi
 fi
+
+cd "$MYDIR/install"
+if [ ! -d moosh ]; then
+    eval "files=($(ls moosh_*.zip 2>/dev/null))"
+    [ ${#files[*]} -gt 0 ] || die "Impossible de trouver l'archive moosh"
+    moosh="${files[0]}"
+
+    echo "... décompression de moosh"
+    unzip "$moosh"
+fi
+if [ ! -d moodle ]; then
+    eval "files=($(ls moodle-*.tgz moodle-*.zip 2>/dev/null))"
+    [ ${#files[*]} -gt 0 ] || die "Impossible de trouver l'archive moodle"
+    moodle="${files[0]}"
+
+    echo "... décompression de moodle"
+    case "$moodle" in
+    *.tgz) tar xzf "$moodle";;
+    *.zip) unzip "$moodle";;
+    esac
+fi
+
+cd "$MYDIR"
 if [ -n "$build" ]; then
     docker compose build "${build_args[@]}" || exit 1
 fi
-
 if [ "$action" != none ]; then
     exec docker compose "$action" "${action_options[@]}"
 fi

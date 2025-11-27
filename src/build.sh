@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
-source /src/shared_env || exit 1
-source /src/moodle.conf || exit 1
+source /config/shared_env || exit 1
+source /config/moodle.conf || exit 1
 
 MYDIR="$(cd "$(dirname "$0")"; pwd)"
 MYNAME="$(basename "$0")"
@@ -14,7 +14,6 @@ function die() {
 # installer les outils nécessaires
 syspackages=(
     less
-    cron
 )
 apt-get update
 apt-get install -y --no-install-recommends "${syspackages[@]}" "${packages[@]}"
@@ -43,25 +42,13 @@ ln -sf /src/apache/000-default.conf /etc/apache2/sites-enabled/000-default.conf
 ln -sf /src/apache/ports.conf /etc/apache2/ports.conf
 
 # créer l'utilisateur moodle
-useradd -m -u 1000 -U -d /var/www/moodle moodle
-
-# installer moosh
-eval "files=($(ls /src/install/moosh_*.zip 2>/dev/null))"
-[ ${#files[*]} -gt 0 ] || die "Impossible de trouver l'archive moosh"
-
-unzip "${files[0]}" -d /opt
-chown -R moodle: /opt/moosh
-ln -s /opt/moosh/moosh.php /usr/local/bin/moosh
+useradd -m -u "$USER_UID" -U -d /var/www/moodle moodle
 
 # répertoire de données
 mkdir -p /var/www/moodledata
-chown -R moodle: /var/www/moodledata
+chown moodle: /var/www/moodledata
 
-# installer moodle
-eval "files=($(ls /src/install/moodle-*.tgz 2>/dev/null))"
-[ ${#files[*]} -gt 0 ] || die "Impossible de trouver l'archive moodle"
-
-tar xzf "${files[0]}" -C /var/www
-chown -R moodle: /var/www/moodle
+# moosh
+ln -s /opt/moosh/moosh.php /usr/local/bin/moosh
 
 exit 0

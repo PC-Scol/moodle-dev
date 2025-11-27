@@ -3,7 +3,7 @@ FROM php:8.2-apache
 
 USER root
 COPY src/ /src/
-COPY install/ /src/install/
+COPY config/ /config/
 RUN /src/build.sh
 
 EXPOSE 8080
