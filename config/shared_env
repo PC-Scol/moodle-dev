@@ -1,8 +1,7 @@
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
 
 HOST=localhost
-#PORT=8080
-PORT=7081
+PORT=8080
 
 LISTEN="$PORT"
 

@@ -10,7 +10,7 @@ moosh config-set cronclionly 0
 moosh config-set cronremotepassword cron
 
 # configurer le serveur mail
-moosh config-set smtphosts smtp.domain.tld
+moosh config-set smtphosts smtp.univ-domain.tld
 moosh config-set noreplyaddress no-reply@univ-domain.tld
 
 # télécharger la liste des plugins disponibles
