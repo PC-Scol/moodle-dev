@@ -20,8 +20,8 @@ Démarrage rapide
     `moodle-latest-501.tgz` ou `moodle-latest-501.zip`.
   * la dernière version LTS est la 4.5 et le fichier s'appelle
     `moodle-latest-405.tgz` ou `moodle-latest-405.zip`. Si vous téléchargez
-    cette version-là ou la version 5.0, vous DEVEZ mettre `supportv51=` dans le
-    fichier `config/moodle.conf`
+    cette version-là ou la version 5.0, la variable `supportv51` doit être vide
+    ou valoir 'auto' dans le fichier `config/moodle.conf`
 * modifier le cas échéant les fichiers suivants:
   * `config/shared_env` pour spécifier notamment le port d'écoute et le nom
     d'hôte. la valeur par défaut est le port 8000 sur localhost. ces valeurs
@@ -29,7 +29,7 @@ Démarrage rapide
     Moodle.
   * `config/moodle.conf` pour spécifier notamment le mot de passe de
     l'utilisateur admin et le mail associé. Si vous installez la version 4.5 ou
-    5.0, vous DEVEZ mettre `supportv51=` dans ce fichier
+    5.0, la variable `supportv51` DOIT être vide ou valoir 'auto'
   * `config/moodle.init` pour indiquer des commandes à lancer pour initialiser
     l'instance Moodle après sa configuration initiale.
 * puis démarrer les containers
