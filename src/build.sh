@@ -1,7 +1,7 @@
 #!/bin/bash
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
 source /config/shared_env || exit 1
-source /src/defaults.sh || exit 1
+source /src/functions.sh || exit 1
 source /config/moodle.conf || exit 1
 source /src/setup.sh || exit 1
 

@@ -2,9 +2,8 @@
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
 MYDIR="$(cd "$(dirname "$0")"; pwd)"
 source "$MYDIR/config/shared_env" || exit 1
-source "$MYDIR/src/defaults.sh" || exit 1
+source "$MYDIR/src/functions.sh" || exit 1
 source "$MYDIR/config/moodle.conf" || exit 1
-source "$MYDIR/src/setup.sh" || exit 1
 
 SOPTS=rbDjK0a:dkn
 LOPTS=help,build,remove,nuke,archive:,debug,no-cache,detach,stop,none
@@ -79,6 +78,7 @@ if [ ! -d moosh ]; then
     echo "... décompression de $moosh"
     unzip "$moosh" || die
 fi
+set_supportv51=none
 if [ ! -d moodle ]; then
     if [ -n "$archive" ]; then
         moodle="$(basename "$archive")"
@@ -94,10 +94,16 @@ if [ ! -d moodle ]; then
     *.tgz) tar xzf "$moodle";;
     *.zip) unzip "$moodle";;
     esac || die
+
+    set_supportv51 "$moodle"
+    set_supportv51="$supportv51"
 fi
+
+source "$MYDIR/src/setup.sh" || exit 1
 
 cd "$MYDIR"
 eval "srcs=($(find -type f -name "*.in"))"
+rebuild=
 for src in "${srcs[@]}"; do
     dest="${src%.in}"
     if [ -n "$build" ]; then regen=1
@@ -105,11 +111,22 @@ for src in "${srcs[@]}"; do
     elif [ "$src" -nt "$dest" ]; then regen=1
     else regen=
     fi
-    [ -n "$regen" ] && sed <"$src" >"$dest" "s|@@moodleroot@@|$moodleroot|"
+    if [ -n "$regen" ]; then
+        sed <"$src" >"$dest" "
+          s|@@moodleroot@@|$moodleroot|
+          s|@@supportv51@@|$set_supportv51|"
+        rebuild=1
+    fi
 done
+[ -n "$rebuild" ] && build=1
 
 if [ -n "$build" ]; then
     echo "... construction des images"
+    if [ -n "$supportv51" ]; then
+        echo "INFO: support Moodle 5.1+"
+    else
+        echo "INFO: support Moodle 4.5 - 5.0 uniquement"
+    fi
     docker compose build "${build_args[@]}" || exit 1
 fi
 

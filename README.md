@@ -24,7 +24,7 @@ Démarrage rapide
     fichier `config/moodle.conf`
 * modifier le cas échéant les fichiers suivants:
   * `config/shared_env` pour spécifier notamment le port d'écoute et le nom
-    d'hôte. la valeur par défaut est le port 8080 sur localhost. ces valeurs
+    d'hôte. la valeur par défaut est le port 8000 sur localhost. ces valeurs
     conditionnent l'url à partir de laquelle il faudra accéder à l'instance de
     Moodle.
   * `config/moodle.conf` pour spécifier notamment le mot de passe de
@@ -37,7 +37,7 @@ Démarrage rapide
   ./start
   ~~~
 * attendre la configuration initiale. L'instance Moodle est alors disponible sur
-  <http://localhost:8080>
+  <http://localhost:8000>
 * Utiliser Ctrl+C pour arrêter les container
 
 Une fois que les containers sont lancés, la commande `moosh` peut être utilisée

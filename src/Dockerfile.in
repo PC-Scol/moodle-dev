@@ -4,6 +4,7 @@ FROM php:8.2-apache
 USER root
 COPY src/ /src/
 COPY config/ /config/
+ENV set_supportv51=@@supportv51@@
 RUN /src/build.sh
 
 EXPOSE 8080
