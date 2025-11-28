@@ -6,6 +6,10 @@ IMPORTANT: ne PAS utiliser cette installation pour de la prod
 TODO: comment est développé un plugin moodle? faut-il modifier ce projet pour
 faciliter l'intégration d'une version de développement d'un plugin?
 
+> [!IMPORTANT]
+> Pour l'instant, à cause du changement dans la structure des répertoires, ce
+> POC ne supporte que les versions >= 5.0 de Moodle.
+
 Démarrage rapide
 * télécharger la release de Moodle sur <https://download.moodle.org/releases/latest/>
   puis copier le fichier dans le répertoire `install`
