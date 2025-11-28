@@ -118,7 +118,7 @@ for src in "${srcs[@]}"; do
         rebuild=1
     fi
 done
-[ -n "$rebuild" ] && build=1
+[ -n "$rebuild" -a "$action" != none ] && build=1
 
 if [ -n "$build" ]; then
     echo "... construction des images"
