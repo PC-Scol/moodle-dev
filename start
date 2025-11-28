@@ -1,22 +1,20 @@
 #!/bin/bash
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
+MYDIR="$(cd "$(dirname "$0")"; pwd)"
+source "$MYDIR/config/shared_env" || exit 1
+source "$MYDIR/src/defaults.sh" || exit 1
+source "$MYDIR/config/moodle.conf" || exit 1
+source "$MYDIR/src/setup.sh" || exit 1
 
-MYDIR="$(cd "$(dirname -- "$0")"; pwd)"
-MYNAME="$(basename -- "$0")"
-
-function die() {
-    echo "ERREUR FATALE: $*" 1>&2
-    exit 1
-}
-
-SOPTS=bDjK0dkn
-LOPTS=help,build,remove,nuke,debug,no-cache,detach,stop,none
+SOPTS=rbDjK0a:dkn
+LOPTS=help,build,remove,nuke,archive:,debug,no-cache,detach,stop,none
 args="$(getopt -n "$MYNAME" -o "$SOPTS" -l "$LOPTS" -- "$@")" || exit 1; eval "set -- $args"
 
 build=
 build_args=()
 remove=
 nuke=
+archive=
 action=up
 action_options=()
 while [ $# -gt 0 ]; do
@@ -30,7 +28,7 @@ USAGE
     $MYNAME [options...]
 
 OPTIONS
-    -b, --build
+    -r, -b, --build
     -D, --debug
     -j, --no-cache
         (re)construire l'image avant de lancer les containers
@@ -38,17 +36,22 @@ OPTIONS
         supprimer les volumes et la configuration pour redémarrer à zéro
     -0, --nuke
         supprimer aussi le répertoire install/moodle
+    -a, --archive ARCHIVE
+        spécifier l'archive à utiliser dans le répertoire install e.g
+            ./$MYNAME -rK0 -a moodle-latest-501.tgz
+        pour forcer l'installation de la version 5.1
     -d, --detach
         lancer les containers en tâche de fond
     -k, --stop
         arrêter les containers qui tournent en tâche de fond"
         exit 0
         ;;
-    -b|--build) build=1;;
+    -r|-b|--build) build=1;;
     -D|--debug) build_args+=(--progress plain);;
     -j|--no-cache) build_args+=(--no-cache);;
     -K|--remove) remove=1;;
     -0|--nuke) nuke=1;;
+    -a|--archive) shift; archive="$1";;
     -d|--detach) action=up; action_options+=(--detach);;
     -k|--stop) action=down;;
     -n|--none) action=none;;
@@ -69,29 +72,51 @@ fi
 
 cd "$MYDIR/install"
 if [ ! -d moosh ]; then
-    eval "files=($(ls moosh_*.zip 2>/dev/null))"
+    eval "files=($(ls -r moosh_*.zip 2>/dev/null))"
     [ ${#files[*]} -gt 0 ] || die "Impossible de trouver l'archive moosh"
     moosh="${files[0]}"
 
-    echo "... décompression de moosh"
-    unzip "$moosh"
+    echo "... décompression de $moosh"
+    unzip "$moosh" || die
 fi
 if [ ! -d moodle ]; then
-    eval "files=($(ls moodle-*.tgz moodle-*.zip 2>/dev/null))"
-    [ ${#files[*]} -gt 0 ] || die "Impossible de trouver l'archive moodle"
-    moodle="${files[0]}"
+    if [ -n "$archive" ]; then
+        moodle="$(basename "$archive")"
+        [ -f "$moodle" ] || die "$archive: fichier introuvable"
+    else
+        eval "files=($(ls -r moodle-*.tgz moodle-*.zip 2>/dev/null))"
+        [ ${#files[*]} -gt 0 ] || die "Impossible de trouver l'archive moodle"
+        moodle="${files[0]}"
+    fi
 
-    echo "... décompression de moodle"
+    echo "... décompression de $moodle"
     case "$moodle" in
     *.tgz) tar xzf "$moodle";;
     *.zip) unzip "$moodle";;
-    esac
+    esac || die
 fi
 
 cd "$MYDIR"
+eval "srcs=($(find -type f -name "*.in"))"
+for src in "${srcs[@]}"; do
+    dest="${src%.in}"
+    if [ -n "$build" ]; then regen=1
+    elif [ ! -f "$dest" ]; then regen=1
+    elif [ "$src" -nt "$dest" ]; then regen=1
+    else regen=
+    fi
+    [ -n "$regen" ] && sed <"$src" >"$dest" "s|@@moodleroot@@|$moodleroot|"
+done
+
 if [ -n "$build" ]; then
+    echo "... construction des images"
     docker compose build "${build_args[@]}" || exit 1
 fi
+
 if [ "$action" != none ]; then
+    case "$action" in
+    up) echo "... démarrage des containers";;
+    down) echo "... arrêt des containers";;
+    esac
     exec docker compose "$action" "${action_options[@]}"
 fi

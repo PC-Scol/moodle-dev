@@ -8,5 +8,5 @@ RUN /src/build.sh
 
 EXPOSE 8080
 USER moodle
-WORKDIR /var/www/moodle/public
+WORKDIR @@moodleroot@@
 ENTRYPOINT ["/src/entrypoint.sh"]

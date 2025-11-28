@@ -3,7 +3,7 @@
     #ServerName moodle-dev.domain.tld
 
     ServerAdmin webmaster@domain.tld
-    DocumentRoot /var/www/moodle/public
+    DocumentRoot @@moodleroot@@
 
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined

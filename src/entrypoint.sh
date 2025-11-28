@@ -1,15 +1,9 @@
 #!/bin/bash
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
 source /config/shared_env || exit 1
+source /src/defaults.sh || exit 1
 source /config/moodle.conf || exit 1
-
-MYDIR="$(cd "$(dirname "$0")"; pwd)"
-MYNAME="$(basename "$0")"
-
-function die() {
-    echo "ERREUR FATALE: $*" 1>&2
-    exit 1
-}
+source /src/setup.sh || exit 1
 
 # attendre que mysql est disponible
 echo "# attente de mysql"
@@ -22,23 +16,23 @@ while true; do
 done
 
 # configurer moodle
-cd /var/www/moodle
+cd "$moodlebase"
 if [ ! -d vendor ]; then
     composer i
 fi
 if [ ! -f config.php ]; then
     echo "# installation de moodle"
-    cd /var/www/moodle/admin/cli
+    cd "$moodlebase/admin/cli"
     php install.php "${initial_config[@]}"
 
     echo "# configuration initiale de moodle"
-    cd /var/www/moodle/public
+    cd "$moodleroot"
     /config/moodle.init
 fi
 
 # démarrer apache
 echo "# démarrage apache"
-cd /var/www/moodle/public
+cd "$moodleroot"
 export APACHE_RUN_USER=moodle
 export APACHE_RUN_GROUP=moodle
 exec /usr/local/bin/apache2-foreground
